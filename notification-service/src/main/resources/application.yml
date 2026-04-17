@@ -7,7 +7,8 @@ spring:
       enable-auto-commit: false
       key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      max-poll-records : 100
+      max-poll-records : 10 #Max records pulled per poll
+      max-poll-interval-ms: 600000   # 10 minutes Time between the two polls
 #    producer:
 #      key-serializer: org.apache.kafka.common.serialization.LongSerializer
 #      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
