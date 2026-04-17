@@ -1,6 +1,10 @@
 
 # Kafka setup having two brokers and 3 partitions each with Docker compose
 
+# To set the volumes
+- run `docker run --rm apache/kafka:latest /opt/kafka/bin/kafka-storage.sh random-uuid` it will generate the cluster id eg: `5L6g3nShT-eMCtK--X86sw` \
+- set it as on all the brokers `KAFKA_CLUSTER_ID: 5L6g3nShT-eMCtK--X86sw`
+
 ```yml
 #Docker compose for kafka with two brokers 
 services:
@@ -10,7 +14,7 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CLUSTER_ID: kraft-cluster-1
+      KAFKA_CLUSTER_ID: 5L6g3nShT-eMCtK--X86sw
       # ✅ LISTEN on all interfaces
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
@@ -23,6 +27,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
       - kafka-data-1:/var/lib/kafka/data 
     ports:
@@ -34,7 +39,7 @@ services:
     environment:
       KAFKA_NODE_ID: 2
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CLUSTER_ID: kraft-cluster-1
+      KAFKA_CLUSTER_ID: 5L6g3nShT-eMCtK--X86sw
       # ✅ LISTEN on all interfaces
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9094
@@ -47,6 +52,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 3
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
       - kafka-data-2:/var/lib/kafka/data
     ports:
@@ -56,9 +62,13 @@ volumes:
   kafka-data-2:
 ```
 - To build and run the docker compose \
-`docker-compose up -d`
+  `docker-compose up -d`
+- Set the uuid in server.properties [Replace the <UUID> with previously generated UUID] Needed to use the volumes.
+  `docker exec -it broker /opt/kafka/bin/kafka-storage.sh format -t <UUID> -c /opt/kafka/config/kraft/server.properties`
+- restart the compose
+  `docker-compose restart`
 - To open the pod bash \
-`docker exec -it broker bash` 
+  `docker exec -it broker bash`
 - TO list the existing kafka topics \
 `kafka-topics.sh --list --bootstrap-server localhost:9092`
 
